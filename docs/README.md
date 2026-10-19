@@ -1,5 +1,12 @@
 # DataStructurePlugin 开发快速开始
 
+当前产品入口为 **AC 自动机 · 交互课堂**，使用说明、语义与独立域设计见
+[AC 自动机课堂](aho-corasick.md)。模板的 Main 示例与一次性工作台消息命令已被移除；
+后面的部署、SDK、图标与 Workflow 说明仍作为开发参考。
+
+当前设计审核与本地开发验证见 [G0001 专项档案](refactoring/G0001/README.md)，
+后续专题归档从 [专项索引](refactoring/README.md) 进入。本阶段不执行 Windows CI 或发布门禁。
+
 本解决方案用于开发 `myavalonia.plugin.data.structure` Managed Plugin。它把真实插件、独立 Avalonia 开发窗口和
 自动化测试放在同一个解决方案中，使界面与业务代码既能快速预览，也能由 MyAvaloniaManagement Host
 按正式插件协议加载。

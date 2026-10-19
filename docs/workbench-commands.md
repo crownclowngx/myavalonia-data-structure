@@ -1,5 +1,8 @@
 # Workbench Command 开发说明
 
+> 当前 AC 自动机域仅注册 Document，不再包含模板的 `MainDocument`、`ApplyWorkbenchMessage`
+> 或对应菜单贡献。页面内命令由 `AhoCorasickDocument` 拥有。下面保留模板的接入参考。
+
 Plugin SDK `3.4.1` 允许插件把少量高价值的用户意图声明为 Workbench Command，使同一语义动作可由
 Host 菜单、快捷键或后续 Command Palette 投影。Command 不是 Avalonia `ICommand` 的替代品；按钮点击、
 表单编辑、拖放和只对单个控件有意义的局部交互，继续使用插件自己的命令或业务用例即可。

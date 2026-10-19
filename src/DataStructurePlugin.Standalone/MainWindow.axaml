@@ -2,9 +2,11 @@
     x:Class="DataStructurePlugin.Standalone.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:views="using:DataStructurePlugin.Features.Main"
-    Width="900"
-    Height="600"
-    Title="DataStructurePlugin Standalone">
-  <views:MainView />
+    xmlns:views="using:DataStructurePlugin.Features.AhoCorasick"
+    Width="1440"
+    Height="980"
+    MinWidth="640"
+    MinHeight="580"
+    Title="AC 自动机 · 交互课堂">
+  <views:AhoCorasickView />
 </Window>
