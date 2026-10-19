@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DataStructurePlugin.Plugin/DataStructurePlugin.Plugin.csproj" />
+    <Project Path="src/DataStructurePlugin.Standalone/DataStructurePlugin.Standalone.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DataStructurePlugin.Tests/DataStructurePlugin.Tests.csproj" />
+  </Folder>
+</Solution>
