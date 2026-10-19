@@ -6,7 +6,7 @@ namespace DataStructurePlugin.Features.AhoCorasick.Domain;
 public enum AcStage { Trie, Failure, Search }
 
 /// <summary>可回放的算法事件。一次字符处理可以产生多次回退和多条输出。</summary>
-public enum AcAction { Ready, Insert, Reuse, Terminal, Dequeue, Candidate, SetFailure, Read, Fallback, Transition, Match, Complete }
+public enum AcAction { Ready, Insert, Reuse, Terminal, Dequeue, Candidate, SetFailure, Read, Compare, Fallback, Transition, Match, Complete }
 
 /// <summary>构建完成后的只读状态。边以 Unicode 码点为键，状态身份由插入次序决定。</summary>
 public sealed record AcNode(int Id, string Prefix, int Depth, ImmutableDictionary<int, int> Edges, int PatternId);

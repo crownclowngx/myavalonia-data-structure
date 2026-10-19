@@ -104,7 +104,32 @@ public sealed partial class AhoCorasickDocument : ObservableObject, IPluginDocum
     public string ModeCaption => IsReading ? "跟着问题理解，再亲手验证。" : "换一组输入，观察同一套规则如何工作。";
     public string ProgressLabel => $"{FrameIndex + 1} / {Trace.Steps.Length}";
     public string StageLabel => CurrentStep.Stage switch { AcStage.Trie => "01  构建 Trie", AcStage.Failure => "02  构建 fail", _ => "03  扫描文本" };
-    public string Statistics => $"{Trace.Patterns.Length} 个关键词   ·   {Trace.Nodes.Length} 个状态   ·   {Trace.Symbols.Length} 个文本字符";
+    public string Statistics => $"{Trace.Patterns.Length} 个关键词   ·   已长出 {CurrentStep.VisibleNodes} / {Trace.Nodes.Length} 个状态   ·   {Trace.Symbols.Length} 个文本字符";
+    public string StepHint => CurrentStep.Stage switch
+    {
+        AcStage.Trie => "从根开始，每一步只新建或复用一个前缀节点，再单独标记词尾；尚未建立的节点不会提前显示。",
+        AcStage.Failure => "Trie 已建好。逐节点比较后缀候选，再建立 fail 虚线；尚未确定的 fail 不会提前显示。",
+        _ => "树已建好。读取 → 比较 → 必要时回退并再比较 → 转移 → 逐条输出；每个动作都可以停下来。"
+    };
+    public string TraversalLabel => CurrentStep.Stage == AcStage.Search
+        ? CurrentStep.ActiveSymbol >= 0
+            ? $"当前字符 {CurrentStep.ActiveSymbol + 1} / {Trace.Symbols.Length}：「{Trace.Symbols[CurrentStep.ActiveSymbol].Text}」  ·  状态 {DisplayNode(CurrentStep.State)}  ·  已输出 {CurrentStep.MatchCount} 条"
+            : $"{CursorLabel}  ·  已输出 {CurrentStep.MatchCount} 条"
+        : $"当前前缀 {DisplayNode(CurrentStep.State)}  ·  深度 {Trace.Nodes[CurrentStep.State].Depth}  ·  已标记 {CurrentStep.CompletedPatterns} 个词尾";
+    public string NextStepLabel => FrameIndex == MaximumPosition ? "演示已完成" : Trace.Steps[FrameIndex + 1].Action switch
+    {
+        AcAction.Insert => "下一步 · 长出一个节点 →",
+        AcAction.Reuse => "下一步 · 复用前缀 →",
+        AcAction.Terminal => "下一步 · 标记词尾 →",
+        AcAction.Compare => "下一步 · 比较字符 →",
+        AcAction.Fallback => "下一步 · 沿 fail 回退 →",
+        AcAction.Transition => "下一步 · 消费字符 →",
+        AcAction.Match => "下一步 · 输出一条结果 →",
+        AcAction.Read => "下一步 · 读取字符 →",
+        AcAction.SetFailure => "下一步 · 建立 fail →",
+        AcAction.Candidate => "下一步 · 检查候选 →",
+        _ => "下一步 →"
+    };
     public string CursorLabel => $"已消费 {CurrentStep.ConsumedSymbols} / {Trace.Symbols.Length} 个码点";
     public string QueueLabel => CurrentStep.Queue.IsEmpty ? "队列为空" : string.Join("  →  ", CurrentStep.Queue.Select(DisplayNode));
     public string MatchSummary => $"已发现 {CurrentStep.MatchCount} 次命中";
@@ -240,7 +265,8 @@ public sealed partial class AhoCorasickDocument : ObservableObject, IPluginDocum
             while (_visibleMatches.Count < CurrentStep.MatchCount) _visibleMatches.Add(_matchRows[_visibleMatches.Count]);
             foreach (var property in new[] { nameof(CurrentStep), nameof(Position), nameof(FrameIndex), nameof(MaximumPosition),
                 nameof(IsPlaying), nameof(PlayLabel), nameof(Speed), nameof(ProgressLabel), nameof(StageLabel),
-                nameof(CursorLabel), nameof(QueueLabel), nameof(MatchSummary), nameof(NextEventLabel) })
+                nameof(CursorLabel), nameof(QueueLabel), nameof(MatchSummary), nameof(NextEventLabel),
+                nameof(Statistics), nameof(StepHint), nameof(TraversalLabel), nameof(NextStepLabel) })
                 OnPropertyChanged(property);
         }
         finally { _projecting = false; }

@@ -1,0 +1,51 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:Class="DataStructurePlugin.Features.AhoCorasick.Controls.AcThemeResources">
+  <!-- 语义资源让浅色与深色保持相同的层级和含义；所有正文、卡片、输入与提示都随祖先主题更新。
+       默认继承 Host 或 Standalone 的主题，不在 Document 内建立第二套主题选择状态。
+       自绘控件接收不可变调色板，DynamicResource 更新属性后由 AffectsRender 触发重绘。 -->
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="Ac.Page" Color="#F6F5F0" />
+      <SolidColorBrush x:Key="Ac.Surface" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="Ac.Text" Color="#243D3D" />
+      <SolidColorBrush x:Key="Ac.Muted" Color="#53665D" />
+      <SolidColorBrush x:Key="Ac.Border" Color="#DDE5D9" />
+      <SolidColorBrush x:Key="Ac.Button" Color="#ECF0EA" />
+      <SolidColorBrush x:Key="Ac.Primary" Color="#087F78" />
+      <SolidColorBrush x:Key="Ac.OnPrimary" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="Ac.Accent" Color="#087F78" />
+      <SolidColorBrush x:Key="Ac.Input" Color="#FAFBF8" />
+      <SolidColorBrush x:Key="Ac.InputBorder" Color="#718B80" />
+      <SolidColorBrush x:Key="Ac.Selection" Color="#DDEDE4" />
+      <SolidColorBrush x:Key="Ac.Badge" Color="#DEECE1" />
+      <SolidColorBrush x:Key="Ac.Note" Color="#E8EDE2" />
+      <SolidColorBrush x:Key="Ac.Formula" Color="#F0F5E9" />
+      <SolidColorBrush x:Key="Ac.Explanation" Color="#EEF5F0" />
+      <SolidColorBrush x:Key="Ac.WarningBackground" Color="#FFF0D8" />
+      <SolidColorBrush x:Key="Ac.WarningText" Color="#89531D" />
+      <SolidColorBrush x:Key="Ac.Error" Color="#B74636" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="Ac.Page" Color="#171E20" />
+      <SolidColorBrush x:Key="Ac.Surface" Color="#222C2F" />
+      <SolidColorBrush x:Key="Ac.Text" Color="#E3ECE7" />
+      <SolidColorBrush x:Key="Ac.Muted" Color="#ABBBB2" />
+      <SolidColorBrush x:Key="Ac.Border" Color="#41534F" />
+      <SolidColorBrush x:Key="Ac.Button" Color="#30413E" />
+      <SolidColorBrush x:Key="Ac.Primary" Color="#087F78" />
+      <SolidColorBrush x:Key="Ac.OnPrimary" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="Ac.Accent" Color="#65D7C8" />
+      <SolidColorBrush x:Key="Ac.Input" Color="#1B2528" />
+      <SolidColorBrush x:Key="Ac.InputBorder" Color="#819F95" />
+      <SolidColorBrush x:Key="Ac.Selection" Color="#2D443D" />
+      <SolidColorBrush x:Key="Ac.Badge" Color="#2A443B" />
+      <SolidColorBrush x:Key="Ac.Note" Color="#2A3730" />
+      <SolidColorBrush x:Key="Ac.Formula" Color="#2D3A2F" />
+      <SolidColorBrush x:Key="Ac.Explanation" Color="#293B35" />
+      <SolidColorBrush x:Key="Ac.WarningBackground" Color="#493A25" />
+      <SolidColorBrush x:Key="Ac.WarningText" Color="#F3CB8C" />
+      <SolidColorBrush x:Key="Ac.Error" Color="#FFAA9A" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

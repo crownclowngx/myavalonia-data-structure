@@ -8,7 +8,7 @@
 1. **跟着学**：选一个章节，阅读例子、公式，按需展开证明，并回答预测题。
 2. **演示这一节**：显式载入经典词典 `he / she / his / hers` 与 `ushers`，定位到相应关键事件。
    教材和练习始终讲述课堂例子；自定义实验不会偷偷替换教材中的例子与结论。
-3. **自己试**：每行输入一个关键词，输入待匹配文本，再点击“构建并开始实验”。
+3. **自己试**：每行输入一个关键词，输入待匹配文本，再点击“应用输入 · 从根开始”。
 4. 用阶段按钮、时间轴、前后单步、关键事件跳转或播放观察过程。点击节点检查 fail、
    自身终止词和后缀输出；根节点的 fail 连线只在相关节点选中或当前回退时显示。
 5. 点击已发现的匹配结果，跳回它的报告步骤。“扫描至结尾”展示全部结果。
@@ -16,6 +16,17 @@
 画布支持滚轮缩放、鼠标拖动平移和“适应画布”；画布获得焦点后按 0 复位。
 宽窗口显示章节侧栏与检查器；窄窗口改用章节下拉框并将输入与检查器排列到画布下方。
 播放条固定在底部。编辑输入、手动跳转、切换章节或移除 View 会暂停播放。
+
+画布旁也有“从根重新构建”“上一步”和单步按钮。应用输入后停在只有根节点的第 1 步，
+按词典顺序逐字符新建或复用前缀节点，词尾标记单独出现；BFS 阶段再逐层确定 fail。
+统计显示“已长出 / 总状态数”，总数仅作为进度参考，不代表节点已经全部显示。
+扫描时将读取、比较、fail 回退、再次比较、消费字符和每一条输出拆开；
+同一位置的 she、he 会分两步报告。回看时会撤去后来建立的节点、fail 和结果。
+“下一次命中”和“扫描至结尾”是显式快进；想看完整判断过程请使用“下一步”。
+
+课堂继承 Host 的深色或浅色主题；Standalone 继承 Avalonia 的应用主题。
+页面、卡片、输入、公式、提示、图中节点/连线及文本带都会实时更新，不重置实验进度。
+配色限定在 AC 的 View 内，其他 Document 不受影响。
 
 ## 输入与匹配语义
 
@@ -43,6 +54,8 @@ Features/AhoCorasick/
   Content/LessonCatalog.cs     # 本域章节、数学、伪代码和练习
   Controls/AutomatonCanvas.cs  # AC 图绘制与节点命中检查
   Controls/TextTape.cs         # Unicode 文本带与最近一次命中标注
+  Controls/AcThemeResources.* # 本域深浅主题的语义画刷
+  Controls/AcDrawingPalette.cs # 两个自绘控件的不可变画笔集合
 ```
 
 Document ID 为 `myavalonia.plugin.data.structure.document.aho-corasick`；插件 ID 维持
@@ -79,6 +92,7 @@ AC 的节点、fail、输出、章节和控件只属于 AC；先由第二个专�
 
 完整本地 Debug 门禁与审核修复见 [G0001 测试记录](refactoring/G0001/testing.md)；
 SOLID 边界与所有权设计见 [G0001 实施设计](refactoring/G0001/implementation.md)。
+深浅主题、逐步比较及后续本地验证见 [G0002 专项说明](refactoring/G0002/README.md)。
 
 ```powershell
 dotnet build DataStructurePlugin.slnx -c Debug -warnaserror

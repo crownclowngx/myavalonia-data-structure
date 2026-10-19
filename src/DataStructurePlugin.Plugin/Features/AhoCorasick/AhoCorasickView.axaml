@@ -6,32 +6,40 @@
              xmlns:controls="using:DataStructurePlugin.Features.AhoCorasick.Controls"
              x:Class="DataStructurePlugin.Features.AhoCorasick.AhoCorasickView"
              x:DataType="local:AhoCorasickDocument"
-             Background="#F6F5F0" Foreground="#243D3D" FontFamily="Microsoft YaHei UI, Segoe UI">
+             Background="{DynamicResource Ac.Page}" Foreground="{DynamicResource Ac.Text}" FontFamily="Microsoft YaHei UI, Segoe UI">
+  <!-- 配色限定在本域 View 中；不注册 Application 资源，也不修改 Host 的 RequestedThemeVariant。 -->
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <controls:AcThemeResources />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
   <UserControl.Styles>
-    <Style Selector="TextBlock"><Setter Property="Foreground" Value="#243D3D" /></Style>
-    <Style Selector="TextBlock.muted"><Setter Property="Foreground" Value="#6F8079" /><Setter Property="FontSize" Value="12" /></Style>
+    <Style Selector="TextBlock"><Setter Property="Foreground" Value="{DynamicResource Ac.Text}" /></Style>
+    <Style Selector="TextBlock.muted"><Setter Property="Foreground" Value="{DynamicResource Ac.Muted}" /><Setter Property="FontSize" Value="12" /></Style>
     <Style Selector="TextBlock.body"><Setter Property="TextWrapping" Value="Wrap" /><Setter Property="LineHeight" Value="25" /><Setter Property="FontSize" Value="14" /></Style>
     <Style Selector="TextBlock.section"><Setter Property="FontSize" Value="15" /><Setter Property="FontWeight" Value="SemiBold" /></Style>
-    <Style Selector="Border.card"><Setter Property="Background" Value="White" /><Setter Property="BorderBrush" Value="#E0E7DE" /><Setter Property="BorderThickness" Value="1" /><Setter Property="CornerRadius" Value="12" /><Setter Property="Padding" Value="18" /></Style>
-    <Style Selector="Button"><Setter Property="CornerRadius" Value="7" /><Setter Property="Padding" Value="12,8" /><Setter Property="Background" Value="#ECF0EA" /><Setter Property="Foreground" Value="#29483F" /></Style>
-    <Style Selector="Button.primary"><Setter Property="Background" Value="#087F78" /><Setter Property="Foreground" Value="White" /></Style>
-    <Style Selector="Button.quiet"><Setter Property="Background" Value="Transparent" /><Setter Property="Foreground" Value="#087F78" /></Style>
-    <Style Selector="TextBox"><Setter Property="Foreground" Value="#243D3D" /><Setter Property="Background" Value="#FAFBF8" /><Setter Property="BorderBrush" Value="#CFDAD1" /><Setter Property="CornerRadius" Value="6" /><Setter Property="SelectionBrush" Value="#B8DDD2" /></Style>
-    <Style Selector="ComboBox"><Setter Property="Foreground" Value="#243D3D" /><Setter Property="Background" Value="#FAFBF8" /><Setter Property="MinHeight" Value="34" /></Style>
-    <Style Selector="ListBox"><Setter Property="Background" Value="Transparent" /><Setter Property="Foreground" Value="#243D3D" /><Setter Property="BorderThickness" Value="0" /></Style>
-    <Style Selector="ListBoxItem"><Setter Property="Foreground" Value="#243D3D" /><Setter Property="Padding" Value="9,10" /><Setter Property="CornerRadius" Value="7" /></Style>
-    <Style Selector="ListBoxItem:selected"><Setter Property="Background" Value="#DDEDE4" /></Style>
+    <Style Selector="Border.card"><Setter Property="Background" Value="{DynamicResource Ac.Surface}" /><Setter Property="BorderBrush" Value="{DynamicResource Ac.Border}" /><Setter Property="BorderThickness" Value="1" /><Setter Property="CornerRadius" Value="12" /><Setter Property="Padding" Value="18" /></Style>
+    <Style Selector="Button"><Setter Property="CornerRadius" Value="7" /><Setter Property="Padding" Value="12,8" /><Setter Property="Background" Value="{DynamicResource Ac.Button}" /><Setter Property="Foreground" Value="{DynamicResource Ac.Text}" /></Style>
+    <Style Selector="Button.primary"><Setter Property="Background" Value="{DynamicResource Ac.Primary}" /><Setter Property="Foreground" Value="{DynamicResource Ac.OnPrimary}" /></Style>
+    <Style Selector="Button.quiet"><Setter Property="Background" Value="Transparent" /><Setter Property="Foreground" Value="{DynamicResource Ac.Accent}" /></Style>
+    <Style Selector="TextBox"><Setter Property="Foreground" Value="{DynamicResource Ac.Text}" /><Setter Property="Background" Value="{DynamicResource Ac.Input}" /><Setter Property="BorderBrush" Value="{DynamicResource Ac.InputBorder}" /><Setter Property="CornerRadius" Value="6" /><Setter Property="SelectionBrush" Value="{DynamicResource Ac.Selection}" /></Style>
+    <Style Selector="ComboBox"><Setter Property="Foreground" Value="{DynamicResource Ac.Text}" /><Setter Property="Background" Value="{DynamicResource Ac.Input}" /><Setter Property="MinHeight" Value="34" /></Style>
+    <Style Selector="ListBox"><Setter Property="Background" Value="Transparent" /><Setter Property="Foreground" Value="{DynamicResource Ac.Text}" /><Setter Property="BorderThickness" Value="0" /></Style>
+    <Style Selector="ListBoxItem"><Setter Property="Foreground" Value="{DynamicResource Ac.Text}" /><Setter Property="Padding" Value="9,10" /><Setter Property="CornerRadius" Value="7" /></Style>
+    <Style Selector="ListBoxItem:selected"><Setter Property="Background" Value="{DynamicResource Ac.Selection}" /></Style>
   </UserControl.Styles>
-  <ThemeVariantScope RequestedThemeVariant="Light">
+
   <Grid RowDefinitions="Auto,*,Auto">
-    <Border Padding="24,20,24,16" BorderBrush="#DDE5D9" BorderThickness="0,0,0,1">
+    <Border Padding="24,20,24,16" BorderBrush="{DynamicResource Ac.Border}" BorderThickness="0,0,0,1">
       <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
         <StackPanel Spacing="5">
           <TextBlock Text="数据结构  /  交互笔记  /  字符串算法" Classes="muted" LetterSpacing="1" />
           <StackPanel Orientation="Horizontal" Spacing="12">
             <TextBlock Text="AC 自动机" FontSize="28" FontWeight="Bold" />
-            <Border Background="#DEECE1" CornerRadius="5" Padding="8,4" VerticalAlignment="Center">
-              <TextBlock Text="Aho–Corasick" Foreground="#31755D" FontSize="11" />
+            <Border Background="{DynamicResource Ac.Badge}" CornerRadius="5" Padding="8,4" VerticalAlignment="Center">
+              <TextBlock Text="Aho–Corasick" Foreground="{DynamicResource Ac.Accent}" FontSize="11" />
             </Border>
           </StackPanel>
           <TextBlock Text="{Binding ModeCaption}" Classes="muted" />
@@ -51,13 +59,13 @@
             <ListBox.ItemTemplate>
               <DataTemplate x:DataType="content:AcLesson">
                 <Grid ColumnDefinitions="27,*" ColumnSpacing="8">
-                  <TextBlock Text="{Binding Number}" Foreground="#729083" FontSize="12" VerticalAlignment="Center" />
+                  <TextBlock Text="{Binding Number}" Foreground="{DynamicResource Ac.Muted}" FontSize="12" VerticalAlignment="Center" />
                   <TextBlock Grid.Column="1" Text="{Binding Title}" FontSize="13" VerticalAlignment="Center" />
                 </Grid>
               </DataTemplate>
             </ListBox.ItemTemplate>
           </ListBox>
-          <Border Background="#E8EDE2" CornerRadius="10" Padding="13">
+          <Border Background="{DynamicResource Ac.Note}" CornerRadius="10" Padding="13">
             <StackPanel Spacing="7">
               <TextBlock Text="先想一想，再按下一步。" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
               <TextBlock Text="图、公式和解释描述同一个过程。任何一步都可以停下来、回看或检查。" Classes="muted" TextWrapping="Wrap" LineHeight="20" />
@@ -75,11 +83,11 @@
             </ComboBox>
             <Border Classes="card" IsVisible="{Binding IsReading}">
               <StackPanel Spacing="12">
-                <TextBlock Text="{Binding SelectedLesson.Eyebrow}" Foreground="#56866D" FontSize="10" LetterSpacing="2" />
+                <TextBlock Text="{Binding SelectedLesson.Eyebrow}" Foreground="{DynamicResource Ac.Muted}" FontSize="10" LetterSpacing="2" />
                 <TextBlock Text="{Binding SelectedLesson.Question}" FontSize="22" FontWeight="SemiBold" TextWrapping="Wrap" />
                 <TextBlock Text="{Binding SelectedLesson.Introduction}" Classes="body" />
-                <TextBlock Text="{Binding SelectedLesson.Explanation}" Classes="body" Foreground="#596F65" />
-                <Border Background="#F0F5E9" CornerRadius="8" Padding="15,12">
+                <TextBlock Text="{Binding SelectedLesson.Explanation}" Classes="body" Foreground="{DynamicResource Ac.Muted}" />
+                <Border Background="{DynamicResource Ac.Formula}" CornerRadius="8" Padding="15,12">
                   <StackPanel Spacing="9">
                     <TextBlock Text="{Binding SelectedLesson.Formula}" FontFamily="Cambria Math, Microsoft YaHei UI" FontSize="16" TextWrapping="Wrap" LineHeight="27" />
                     <TextBlock Text="{Binding SelectedLesson.FormulaExplanation}" Classes="muted" TextWrapping="Wrap" LineHeight="21" />
@@ -105,14 +113,24 @@
                   <Button Content="① Trie" Classes="quiet" Command="{Binding GoTrieCommand}" Margin="0,0,5,0" />
                   <Button Content="② fail" Classes="quiet" Command="{Binding GoFailureCommand}" Margin="0,0,5,0" />
                   <Button Content="③ 扫描" Classes="quiet" Command="{Binding GoSearchCommand}" />
-                  <CheckBox Content="显示 fail" IsChecked="{Binding ShowFailures}" Margin="12,0,0,0" VerticalAlignment="Center" Foreground="#596F65" />
+                  <CheckBox Content="显示 fail" IsChecked="{Binding ShowFailures}" Margin="12,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource Ac.Muted}" />
                 </WrapPanel>
-                <controls:AutomatonCanvas x:Name="Graph" Trace="{Binding Trace}" Step="{Binding CurrentStep}" SelectedNode="{Binding SelectedNodeId}" ShowFailures="{Binding ShowFailures}" Height="330" />
+                <!-- 单步入口与画布放在一起，避免必须找到窗口底部才能观察树生长或字符比较。 -->
+                <StackPanel Margin="16,0,16,12" Spacing="8">
+                  <TextBlock Text="{Binding StepHint}" Classes="muted" TextWrapping="Wrap" LineHeight="20" />
+                  <WrapPanel>
+                    <Button Content="↤ 从根重新构建" Command="{Binding RestartCommand}" Margin="0,0,6,5" />
+                    <Button Content="← 上一步" Command="{Binding PreviousCommand}" Margin="0,0,6,5" />
+                    <Button Content="{Binding NextStepLabel}" Classes="primary" Command="{Binding NextCommand}" AutomationProperties.Name="画布单步演示" Margin="0,0,6,5" />
+                  </WrapPanel>
+                  <TextBlock Text="{Binding TraversalLabel}" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource Ac.Accent}" AutomationProperties.Name="当前遍历状态" />
+                </StackPanel>
+                <controls:AutomatonCanvas x:Name="Graph" Palette="{DynamicResource Ac.DrawingPalette}" Trace="{Binding Trace}" Step="{Binding CurrentStep}" SelectedNode="{Binding SelectedNodeId}" ShowFailures="{Binding ShowFailures}" Height="330" />
                 <TextBlock Text="实线：Trie 边   ·   虚线：fail   ·   双圆环：终止节点   ·   深绿：当前状态" Classes="muted" TextWrapping="Wrap" Margin="16,10" />
-                <Border Background="#EEF5F0" Padding="16,12">
+                <Border Background="{DynamicResource Ac.Explanation}" Padding="16,12">
                   <StackPanel Spacing="6">
                     <TextBlock Text="{Binding CurrentStep.Title}" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
-                    <TextBlock Text="{Binding CurrentStep.Explanation}" TextWrapping="Wrap" LineHeight="22" FontSize="13" Foreground="#4F6D61" />
+                    <TextBlock Text="{Binding CurrentStep.Explanation}" TextWrapping="Wrap" LineHeight="22" FontSize="13" Foreground="{DynamicResource Ac.Muted}" />
                   </StackPanel>
                 </Border>
                 <StackPanel Margin="16,13" Spacing="9">
@@ -120,7 +138,7 @@
                     <TextBlock Text="文本带" FontWeight="SemiBold" FontSize="12" />
                     <TextBlock Grid.Column="1" Text="{Binding CursorLabel}" Classes="muted" />
                   </Grid>
-                  <controls:TextTape x:Name="Tape" Trace="{Binding Trace}" Step="{Binding CurrentStep}" Height="68" />
+                  <controls:TextTape x:Name="Tape" Palette="{DynamicResource Ac.DrawingPalette}" Trace="{Binding Trace}" Step="{Binding CurrentStep}" Height="68" />
                   <TextBlock Text="{Binding SearchText, StringFormat='编辑框中的文本：{0}'}" IsVisible="{Binding IsDraft}" Classes="muted" TextWrapping="Wrap" />
                   <TextBlock Text="BFS 队列（从左到右出队）" FontWeight="SemiBold" FontSize="12" />
                   <TextBlock Text="{Binding QueueLabel}" FontFamily="Cascadia Code, Microsoft YaHei UI" Classes="muted" TextWrapping="Wrap" />
@@ -134,7 +152,7 @@
                 <TextBlock Text="{Binding SelectedLesson.Challenge}" TextWrapping="Wrap" />
                 <ListBox ItemsSource="{Binding SelectedLesson.Answers}" SelectedIndex="{Binding AnswerIndex}" AutomationProperties.Name="预测题答案" />
                 <Button Content="检查我的判断" Command="{Binding CheckAnswerCommand}" HorizontalAlignment="Left" />
-                <TextBlock Text="{Binding Feedback}" TextWrapping="Wrap" LineHeight="23" Foreground="#5A7966" />
+                <TextBlock Text="{Binding Feedback}" TextWrapping="Wrap" LineHeight="23" Foreground="{DynamicResource Ac.Muted}" />
               </StackPanel>
             </Border>
           </StackPanel>
@@ -151,21 +169,21 @@
                 <TextBlock Text="待匹配的句子" FontSize="12" FontWeight="SemiBold" />
                 <TextBox Text="{Binding SearchText}" AcceptsReturn="True" Height="75" TextWrapping="Wrap" AutomationProperties.Name="待匹配文本" />
                 <TextBlock Text="精确匹配 · 允许重叠 · 重复词合并" Classes="muted" TextWrapping="Wrap" />
-                <Button Content="构建并开始实验 →" Classes="primary" Command="{Binding BuildCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
-                <Border IsVisible="{Binding IsDraft}" Background="#FFF0D8" Padding="9" CornerRadius="5">
-                  <TextBlock Text="草稿尚未应用，画布仍显示上一次成功构建的实验。" FontSize="12" Foreground="#9A6323" TextWrapping="Wrap" />
+                <Button Content="应用输入 · 从根开始 →" Classes="primary" Command="{Binding BuildCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
+                <Border IsVisible="{Binding IsDraft}" Background="{DynamicResource Ac.WarningBackground}" Padding="9" CornerRadius="5">
+                  <TextBlock Text="草稿尚未应用，画布仍显示上一次成功构建的实验。" FontSize="12" Foreground="{DynamicResource Ac.WarningText}" TextWrapping="Wrap" />
                 </Border>
-                <TextBlock Text="{Binding ErrorMessage}" IsVisible="{Binding HasError}" Foreground="#B74636" TextWrapping="Wrap" FontSize="12" AutomationProperties.Name="输入错误" />
+                <TextBlock Text="{Binding ErrorMessage}" IsVisible="{Binding HasError}" Foreground="{DynamicResource Ac.Error}" TextWrapping="Wrap" FontSize="12" AutomationProperties.Name="输入错误" />
               </StackPanel>
             </Border>
 
             <Border Classes="card">
               <StackPanel Spacing="10">
                 <Grid ColumnDefinitions="*,Auto"><TextBlock Text="状态检查" Classes="section" /><TextBlock Grid.Column="1" Text="点击图中节点" Classes="muted" /></Grid>
-                <TextBlock Text="{Binding InspectedPrefix}" FontSize="24" FontFamily="Cascadia Code, Microsoft YaHei UI" Foreground="#087F78" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding InspectedPrefix}" FontSize="24" FontFamily="Cascadia Code, Microsoft YaHei UI" Foreground="{DynamicResource Ac.Accent}" TextWrapping="Wrap" />
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12"><TextBlock Text="fail →" Classes="muted" /><TextBlock Grid.Column="1" Text="{Binding InspectedFailure}" TextWrapping="Wrap" /></Grid>
                 <TextBlock Text="{Binding SuffixExplanation}" Classes="muted" TextWrapping="Wrap" LineHeight="22" />
-                <Border Height="1" Background="#E1E8DD" />
+                <Border Height="1" Background="{DynamicResource Ac.Border}" />
                 <TextBlock Text="自身终止词" Classes="muted" /><TextBlock Text="{Binding OwnOutput}" TextWrapping="Wrap" />
                 <TextBlock Text="后缀输出" Classes="muted" /><TextBlock Text="{Binding InheritedOutput}" TextWrapping="Wrap" />
               </StackPanel>
@@ -177,7 +195,7 @@
                 <TextBlock Text="点击结果回到命中步骤。区间为 UTF-16 [start, end)。" Classes="muted" TextWrapping="Wrap" LineHeight="20" />
                 <ListBox ItemsSource="{Binding VisibleMatches}" SelectedItem="{Binding SelectedMatch}" MaxHeight="230" AutomationProperties.Name="已发现的匹配结果">
                   <ListBox.ItemTemplate><DataTemplate x:DataType="app:AcMatchRow">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"><TextBlock Text="{Binding Pattern}" TextTrimming="CharacterEllipsis" /><TextBlock Grid.Column="1" Text="{Binding Range}" Foreground="#6C8375" FontFamily="Cascadia Code" FontSize="12" /></Grid>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"><TextBlock Text="{Binding Pattern}" TextTrimming="CharacterEllipsis" /><TextBlock Grid.Column="1" Text="{Binding Range}" Foreground="{DynamicResource Ac.Muted}" FontFamily="Cascadia Code" FontSize="12" /></Grid>
                   </DataTemplate></ListBox.ItemTemplate>
                 </ListBox>
                 <Button Content="扫描至结尾 ↗" Classes="quiet" Command="{Binding FinishCommand}" HorizontalAlignment="Left" />
@@ -196,7 +214,7 @@
       </ScrollViewer>
     </Grid>
 
-    <Border Grid.Row="2" Background="White" BorderBrush="#DDE5D9" BorderThickness="0,1,0,0" Padding="22,10,22,14">
+    <Border Grid.Row="2" Background="{DynamicResource Ac.Surface}" BorderBrush="{DynamicResource Ac.Border}" BorderThickness="0,1,0,0" Padding="22,10,22,14">
       <StackPanel Spacing="5">
         <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding StageLabel}" FontWeight="SemiBold" FontSize="12" /><TextBlock Grid.Column="1" Text="{Binding ProgressLabel}" Classes="muted" /></Grid>
         <Slider Minimum="0" Maximum="{Binding MaximumPosition}" Value="{Binding Position}" TickFrequency="1" IsSnapToTickEnabled="True" AutomationProperties.Name="演示步骤时间轴" />
@@ -213,5 +231,5 @@
       </StackPanel>
     </Border>
   </Grid>
-  </ThemeVariantScope>
+
 </UserControl>

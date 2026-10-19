@@ -16,6 +16,8 @@ namespace DataStructurePlugin.Features.AhoCorasick.Controls;
 /// </summary>
 public sealed class AutomatonCanvas : Control
 {
+    public static readonly StyledProperty<AcDrawingPalette> PaletteProperty = AvaloniaProperty.Register<AutomatonCanvas, AcDrawingPalette>(nameof(Palette), AcDrawingPalette.Light);
+    public AcDrawingPalette Palette { get => GetValue(PaletteProperty); set => SetValue(PaletteProperty, value); }
     public static readonly StyledProperty<AcTrace?> TraceProperty = AvaloniaProperty.Register<AutomatonCanvas, AcTrace?>(nameof(Trace));
     public static readonly StyledProperty<AcStep?> StepProperty = AvaloniaProperty.Register<AutomatonCanvas, AcStep?>(nameof(Step));
     public static readonly StyledProperty<bool> ShowFailuresProperty = AvaloniaProperty.Register<AutomatonCanvas, bool>(nameof(ShowFailures), true);
@@ -33,11 +35,8 @@ public sealed class AutomatonCanvas : Control
     private Point? _drag;
     private bool _moved;
     private double _nodeRadius = 23;
-    private static readonly IBrush Ink = Brush.Parse("#263C42");
-    private static readonly IBrush Teal = Brush.Parse("#087F78");
-    private static readonly IBrush Coral = Brush.Parse("#C96843");
-
-    static AutomatonCanvas() => AffectsRender<AutomatonCanvas>(TraceProperty, StepProperty, ShowFailuresProperty, SelectedNodeProperty);
+    // 调色板是绘图输入之一。动态资源替换它时只重绘，保留缩放、平移和选中节点。
+    static AutomatonCanvas() => AffectsRender<AutomatonCanvas>(TraceProperty, StepProperty, ShowFailuresProperty, SelectedNodeProperty, PaletteProperty);
 
     public AutomatonCanvas()
     {
@@ -52,10 +51,10 @@ public sealed class AutomatonCanvas : Control
     public override void Render(DrawingContext context)
     {
         base.Render(context);
-        context.DrawRectangle(Brush.Parse("#F5F8F6"), null, new Rect(Bounds.Size));
+        context.DrawRectangle(Palette.Canvas, null, new Rect(Bounds.Size));
         for (var x = 18d; x < Bounds.Width; x += 24)
             for (var y = 18d; y < Bounds.Height; y += 24)
-                context.DrawEllipse(Brush.Parse("#DCE5E0"), null, new Point(x, y), 0.8, 0.8);
+                context.DrawEllipse(Palette.Dot, null, new Point(x, y), 0.8, 0.8);
         if (Trace is not { } trace || Step is not { } step || Bounds.Width < 1) return;
         EnsureLayout(trace);
         var width = Math.Max(110, _layout.Max(p => p.X));
@@ -73,8 +72,8 @@ public sealed class AutomatonCanvas : Control
             foreach (var (character, target) in trace.Nodes[i].Edges)
             {
                 if (target >= step.VisibleNodes) continue;
-                var highlighted = step.EdgeFrom == i && step.EdgeTo == target && step.Action is AcAction.Insert or AcAction.Reuse or AcAction.Transition;
-                var color = highlighted ? Teal : Brush.Parse("#ACBCB7");
+                var highlighted = step.EdgeFrom == i && step.EdgeTo == target && step.Action is AcAction.Insert or AcAction.Reuse or AcAction.Compare or AcAction.Transition;
+                var color = highlighted ? Palette.Accent : Palette.Edge;
                 DrawArrow(context, _screen[i], _screen[target], color, highlighted ? 3 : 1.5, radius);
                 var mid = new Point((_screen[i].X + _screen[target].X) / 2 + 10, (_screen[i].Y + _screen[target].Y) / 2 - 7);
                 if (scale > 0.35) DrawText(context, new System.Text.Rune(character).ToString(), mid, color, 12);
@@ -102,7 +101,7 @@ public sealed class AutomatonCanvas : Control
                 path.CubicBezierTo(cp1, cp2, end);
                 path.EndFigure(false);
             }
-            var brush = highlighted ? Coral : Brush.Parse("#C9967A");
+            var brush = highlighted ? Palette.Match : Palette.Failure;
             context.DrawGeometry(null, new Pen(brush, highlighted ? 2.5 : 1.2, DashStyle.Dash), geometry);
             ArrowHead(context, cp2, end, brush);
         }
@@ -113,19 +112,19 @@ public sealed class AutomatonCanvas : Control
             var current = i == step.State;
             var selected = i == SelectedNode;
             var candidate = i == step.Candidate;
-            var fill = current ? Teal : candidate ? Brush.Parse("#FFF0DF") : Brushes.White;
-            var border = current ? Teal : candidate ? Coral : Brush.Parse("#99AFA6");
-            if (selected) context.DrawEllipse(null, new Pen(Brush.Parse("#B4D9D1"), 3), _screen[i], radius + 5, radius + 5);
+            var fill = current ? Palette.Current : candidate ? Palette.Candidate : Palette.Node;
+            var border = current ? Palette.Current : candidate ? Palette.Match : Palette.NodeBorder;
+            if (selected) context.DrawEllipse(null, new Pen(Palette.Selection, 3), _screen[i], radius + 5, radius + 5);
             context.DrawEllipse(fill, new Pen(border, current ? 2.5 : 1.4), _screen[i], radius, radius);
-            if (terminal) context.DrawEllipse(null, new Pen(current ? Brushes.White : Teal, 1), _screen[i], radius - 4, radius - 4);
+            if (terminal) context.DrawEllipse(null, new Pen(current ? Palette.OnCurrent : Palette.Accent, 1), _screen[i], radius - 4, radius - 4);
             if (scale > 0.3)
             {
                 var label = i == 0 ? "ε" : node.Prefix;
                 if (label.Length > 6) label = "…" + string.Concat(label.EnumerateRunes().TakeLast(3).Select(r => r.ToString()));
-                DrawText(context, label, _screen[i], current ? Brushes.White : Ink, Math.Clamp(12 * scale, 8, 12), true);
+                DrawText(context, label, _screen[i], current ? Palette.OnCurrent : Palette.Text, Math.Clamp(12 * scale, 8, 12), true);
             }
         }
-        DrawText(context, "滚轮缩放 · 拖动平移 · 点击检查节点", new Point(14, Bounds.Height - 24), Brush.Parse("#6D807A"), 10);
+        DrawText(context, "滚轮缩放 · 拖动平移 · 点击检查节点", new Point(14, Bounds.Height - 24), Palette.Muted, 10);
     }
 
     private void EnsureLayout(AcTrace trace)

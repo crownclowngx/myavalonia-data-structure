@@ -7,12 +7,14 @@
 - 自定义词典和句子；经典、重叠、中文、连续回退、Unicode、无匹配预设。
 - Trie 生长、fail 构建、文本扫描；播放、暂停、前后单步、阶段与时间轴跳转。
 - 节点检查、后缀解释、BFS 队列、文本带、匹配结果定位。
+- 跟随 Host 的深色与浅色主题，实时切换；画布旁单步观察节点生长、字符比较、fail 回退及逐条输出。
 - 每个数据结构或算法独立业务域、独立 Document，不把后续算法放进 AC 的模型中。
 
 使用方式、输入语义和域边界见 [AC 自动机课堂](docs/aho-corasick.md)。真实交付物是
 `src/DataStructurePlugin.Plugin`；`Standalone` 只负责快速预览同一份 View、Document 与业务代码。
 
 本次 SOLID 再审核、修复与测试映射见 [G0001 专项档案](docs/refactoring/G0001/README.md)。
+深浅主题与逐步比较见 [G0002 专项档案](docs/refactoring/G0002/README.md)。
 本地开发门禁：`pwsh -NoProfile -File tools/verify-g0001.ps1`，只运行 Debug 与开发检查，不运行 Windows CI 或发布门禁。
 
 > 第一次开始开发前，请先阅读 [项目文档与快速开始](docs/README.md)。其中说明了三个子项目和

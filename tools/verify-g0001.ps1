@@ -1,11 +1,14 @@
-# G0001 本地开发门禁。仅运行锁定还原、Debug 构建、单元/Headless 测试、格式和差异检查。
+# 本地开发门禁。默认记录 G0001，后续专项通过 Topic 复用相同检查，避免复制出不同的门禁规则。
 # 设计思路：每条命令立即记录退出码；任一步失败立即停止，失败也写出结构化结果，防止旧的通过记录误导审核。
 # 本脚本不调用 Windows CI、Release、ZIP、安装、部署、签名或 Host 发布门禁。
-param([string]$Root = (Split-Path $PSScriptRoot -Parent))
+param(
+    [string]$Root = (Split-Path $PSScriptRoot -Parent),
+    [ValidatePattern('^G[0-9]{4}$')][string]$Topic = 'G0001'
+)
 
 $ErrorActionPreference = 'Stop'
 $Root = (Resolve-Path -LiteralPath $Root).Path
-$taskEvidence = Join-Path $Root 'TestResults/G0001/local-gate'
+$taskEvidence = Join-Path $Root "TestResults/$Topic/local-gate"
 $taskSummaryPath = Join-Path $taskEvidence 'summary.json'
 $taskSteps = [Collections.Generic.List[object]]::new()
 $taskCounters = $null
@@ -61,7 +64,7 @@ try {
     Invoke-DevelopmentCheck 'format' 'dotnet' @('format', 'DataStructurePlugin.slnx', '--verify-no-changes', '--no-restore')
     Invoke-DevelopmentCheck 'diff-check' 'git' @('-c', 'core.safecrlf=false', 'diff', '--check')
     Write-GateSummary 'passed' '' $taskCounters
-    Write-Host "G0001_LOCAL_GATE_OK $taskSummaryPath"
+    Write-Host "${Topic}_LOCAL_GATE_OK $taskSummaryPath"
 }
 catch {
     Write-GateSummary 'failed' $_.Exception.Message $taskCounters

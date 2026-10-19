@@ -132,8 +132,19 @@ public sealed class AhoCorasickTraceBuilder : IAcTraceBuilder
             var key = Rune.GetRuneAt(symbol.Text, 0).Value;
             Emit(AcStage.Search, AcAction.Read, $"读取第 {i + 1} 个字符「{symbol.Text}」",
                 $"当前状态 {Display(nodes[current].Prefix)}。先尝试 Trie 边；本字符原文区间 [{symbol.Offset}, {symbol.Offset + symbol.Length})。", current);
-            while (current != 0 && !nodes[current].Edges.ContainsKey(key))
+            // 比较本身也是可以暂停的教学事件。每次沿 fail 换状态后，必须重新比较同一个字符，
+            // 不能把整个 while 的多次尝试压缩成一次“跳到最终状态”，否则学习者看不到判断依据。
+            while (true)
             {
+                var hasEdge = nodes[current].Edges.TryGetValue(key, out var target);
+                Emit(AcStage.Search, AcAction.Compare, $"比较「{symbol.Text}」与 {Display(nodes[current].Prefix)} 的出边",
+                    hasEdge
+                        ? $"存在「{symbol.Text}」的 Trie 边，可以到达 {Display(nodes[target].Prefix)}。下一步才执行转移并消费字符。"
+                        : current == 0
+                            ? $"根节点没有「{symbol.Text}」的边。下一步留在根并消费此字符。"
+                            : $"当前没有「{symbol.Text}」的边。下一步沿 fail 回退，然后继续比较同一个字符；文本游标保持不动。",
+                    current, hasEdge ? target : null, hasEdge ? current : null, hasEdge ? target : null);
+                if (hasEdge || current == 0) break;
                 var previous = current;
                 current = fail[current];
                 Emit(AcStage.Search, AcAction.Fallback, $"失配：{Display(nodes[previous].Prefix)} → {Display(nodes[current].Prefix)}",

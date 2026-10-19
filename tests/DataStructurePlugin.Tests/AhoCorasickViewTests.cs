@@ -2,6 +2,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Automation;
 using Avalonia.Input;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using Avalonia.Styling;
 using Avalonia.Headless;
 using Avalonia.Themes.Fluent;
 using Avalonia.Threading;
@@ -19,11 +23,187 @@ public sealed class ClassroomTestApplication : Application
 {
     public override void Initialize() => Styles.Add(new FluentTheme());
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<ClassroomTestApplication>()
-        .UseSkia().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
+        // 在 UI 线程绘制真实 Skia 像素，避免每例重建 Application 时与上一例渲染线程的退出竞态。
+        .UseSkia().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false, ShouldRenderOnUIThread = true });
 }
 
 public sealed class AhoCorasickViewTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task 首次打开继承窗口深浅主题并完整渲染(bool dark)
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(ClassroomTestApplication));
+        await session.Dispatch(() =>
+        {
+            using var document = TestDocuments.Create();
+            var theme = dark ? ThemeVariant.Dark : ThemeVariant.Light;
+            var view = new AhoCorasickView { DataContext = document };
+            var window = new Window { Width = 1440, Height = 1100, RequestedThemeVariant = theme, Content = view };
+            try
+            {
+                window.Show();
+                Dispatcher.UIThread.RunJobs();
+                Assert.Equal(theme, view.ActualThemeVariant);
+                Assert.Same(dark ? AcDrawingPalette.Dark : AcDrawingPalette.Light, view.FindControl<AutomatonCanvas>("Graph")!.Palette);
+                Assert.False(window.TryFindResource("Ac.Page", out _)); // 本域配色不能泄漏成 Host 全局资源。
+                AssertTextContrast(view);
+                Capture(window, $"theme-{(dark ? "dark" : "light")}-reading");
+                document.ExploreModeCommand.Execute(null);
+                document.GoSearchCommand.Execute(null);
+                document.NextEventCommand.Execute(null);
+                Dispatcher.UIThread.RunJobs();
+                Capture(window, $"theme-{(dark ? "dark" : "light")}-match");
+                window.Width = 640;
+                window.Height = 580;
+                Dispatcher.UIThread.RunJobs();
+                Capture(window, $"theme-{(dark ? "dark" : "light")}-narrow");
+            }
+            finally { window.Close(); }
+        }, CancellationToken.None);
+    }
+
+    [Fact]
+    public async Task 应用主题实时往返切换会重绘画布和文本带且保留实验进度()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(ClassroomTestApplication));
+        await session.Dispatch(() =>
+        {
+            var application = Application.Current!;
+            var oldTheme = application.RequestedThemeVariant;
+            using var document = TestDocuments.Create();
+            document.ExploreModeCommand.Execute(null);
+            document.GoSearchCommand.Execute(null);
+            document.NextCommand.Execute(null);
+            document.TogglePlaybackCommand.Execute(null);
+            var step = document.CurrentStep;
+            var frame = document.FrameIndex;
+            var trace = document.Trace;
+            var view = new AhoCorasickView { DataContext = document };
+            var window = new Window { Width = 1100, Height = 1000, Content = view };
+            try
+            {
+                window.Show();
+                foreach (var theme in new[] { ThemeVariant.Light, ThemeVariant.Dark, ThemeVariant.Light })
+                {
+                    application.RequestedThemeVariant = theme;
+                    Dispatcher.UIThread.RunJobs();
+                    var palette = theme == ThemeVariant.Dark ? AcDrawingPalette.Dark : AcDrawingPalette.Light;
+                    var graph = view.FindControl<AutomatonCanvas>("Graph")!;
+                    var tape = view.FindControl<TextTape>("Tape")!;
+                    Assert.Equal(theme, view.ActualThemeVariant);
+                    Assert.Same(palette, graph.Palette);
+                    Assert.Same(palette, tape.Palette);
+                    Assert.Equal(ResourceColor(view, "Ac.Page"), ((ISolidColorBrush)view.Background!).Color);
+                    // 读取实际 Skia 像素，防止只换了主题属性但自绘控件没有立即失效重绘。
+                    AssertPixel(window, graph, new Point(8, 8), palette.Canvas.Color);
+                    AssertPixel(window, tape, new Point(4, 4), palette.Current.Color);
+                    AssertPixel(window, tape, new Point(48, 4), palette.Unread.Color);
+                    Assert.Same(trace, document.Trace);
+                    Assert.Same(step, document.CurrentStep);
+                    Assert.Equal(frame, document.FrameIndex);
+                    Assert.True(document.IsPlaying);
+                }
+            }
+            finally { window.Close(); application.RequestedThemeVariant = oldTheme; }
+        }, CancellationToken.None);
+    }
+
+    [Fact]
+    public async Task 画布旁单步按钮从根长出节点并逐条显示后缀命中()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(ClassroomTestApplication));
+        await session.Dispatch(() =>
+        {
+            using var document = TestDocuments.Create();
+            document.ExploreModeCommand.Execute(null);
+            var view = new AhoCorasickView { DataContext = document };
+            var window = new Window { Width = 1100, Height = 1000, Content = view };
+            try
+            {
+                window.Show();
+                Dispatcher.UIThread.RunJobs();
+                var next = view.GetVisualDescendants().OfType<Button>().Single(b => AutomationProperties.GetName(b) == "画布单步演示");
+                Assert.Equal(1, document.CurrentStep.VisibleNodes);
+                Capture(window, "growth-root");
+                next.Command!.Execute(null);
+                Dispatcher.UIThread.RunJobs();
+                Assert.Equal(AcAction.Insert, document.CurrentStep.Action);
+                Assert.Equal(2, document.CurrentStep.VisibleNodes);
+                Assert.Same(document.CurrentStep, view.FindControl<AutomatonCanvas>("Graph")!.Step);
+                Assert.Contains("已长出 2 /", document.Statistics);
+                Capture(window, "growth-first-node");
+                next.Command.Execute(null);
+                Dispatcher.UIThread.RunJobs();
+                Assert.Equal(3, document.CurrentStep.VisibleNodes);
+                Capture(window, "growth-second-node");
+                document.GoSearchCommand.Execute(null);
+                while (document.CurrentStep.Action != AcAction.Match) next.Command.Execute(null);
+                Assert.Single(document.VisibleMatches);
+                Assert.Equal("she", document.VisibleMatches[0].Pattern);
+                next.Command.Execute(null);
+                Assert.Equal(2, document.VisibleMatches.Count);
+                Assert.Equal("he", document.VisibleMatches[1].Pattern);
+                document.PreviousCommand.Execute(null);
+                Assert.Single(document.VisibleMatches);
+                document.RestartCommand.Execute(null);
+                Assert.Equal(1, document.CurrentStep.VisibleNodes);
+                Assert.Empty(document.VisibleMatches);
+            }
+            finally { window.Close(); }
+        }, CancellationToken.None);
+    }
+
+    private static Color ResourceColor(Control view, string key)
+    {
+        Assert.True(view.TryFindResource(key, view.ActualThemeVariant, out var resource), key);
+        return Assert.IsAssignableFrom<ISolidColorBrush>(resource).Color;
+    }
+
+    private static void AssertTextContrast(Control view)
+    {
+        foreach (var background in new[] { "Ac.Page", "Ac.Surface", "Ac.Input", "Ac.Button", "Ac.Formula", "Ac.Explanation", "Ac.Selection", "Ac.Note" })
+        {
+            Assert.True(Contrast(ResourceColor(view, "Ac.Text"), ResourceColor(view, background)) >= 4.5, background);
+            Assert.True(Contrast(ResourceColor(view, "Ac.Muted"), ResourceColor(view, background)) >= 4.5, background);
+        }
+        Assert.True(Contrast(ResourceColor(view, "Ac.OnPrimary"), ResourceColor(view, "Ac.Primary")) >= 4.5);
+        Assert.True(Contrast(ResourceColor(view, "Ac.WarningText"), ResourceColor(view, "Ac.WarningBackground")) >= 4.5);
+        Assert.True(Contrast(ResourceColor(view, "Ac.Error"), ResourceColor(view, "Ac.Surface")) >= 4.5);
+        var palette = view.FindControl<AutomatonCanvas>("Graph")!.Palette;
+        foreach (var background in new[] { palette.Node, palette.Candidate, palette.Consumed, palette.Unread })
+            Assert.True(Contrast(palette.Text.Color, background.Color) >= 4.5);
+        Assert.True(Contrast(palette.Muted.Color, palette.Canvas.Color) >= 4.5);
+        foreach (var line in new[] { palette.Edge, palette.Failure, palette.Accent, palette.Match })
+            Assert.True(Contrast(line.Color, palette.Canvas.Color) >= 3);
+    }
+
+    private static double Contrast(Color left, Color right)
+    {
+        static double Linear(byte channel) => channel / 255d <= 0.04045 ? channel / 255d / 12.92 : Math.Pow((channel / 255d + 0.055) / 1.055, 2.4);
+        static double Luminance(Color color) => 0.2126 * Linear(color.R) + 0.7152 * Linear(color.G) + 0.0722 * Linear(color.B);
+        var a = Luminance(left);
+        var b = Luminance(right);
+        return (Math.Max(a, b) + 0.05) / (Math.Min(a, b) + 0.05);
+    }
+
+    private static void AssertPixel(Window window, Control control, Point localPoint, Color expected)
+    {
+        using var bitmap = window.CaptureRenderedFrame();
+        Assert.NotNull(bitmap);
+        using var pixels = new WriteableBitmap(bitmap.PixelSize, bitmap.Dpi, PixelFormat.Rgba8888, AlphaFormat.Unpremul);
+        using var buffer = pixels.Lock();
+        bitmap.CopyPixels(buffer);
+        var point = control.TranslatePoint(localPoint, window)!.Value * window.RenderScaling;
+        var offset = (int)point.Y * buffer.RowBytes + (int)point.X * 4;
+        var actual = Color.FromArgb(System.Runtime.InteropServices.Marshal.ReadByte(buffer.Address, offset + 3),
+            System.Runtime.InteropServices.Marshal.ReadByte(buffer.Address, offset),
+            System.Runtime.InteropServices.Marshal.ReadByte(buffer.Address, offset + 1),
+            System.Runtime.InteropServices.Marshal.ReadByte(buffer.Address, offset + 2));
+        Assert.Equal(expected, actual);
+    }
+
     [Fact]
     public async Task 画布节点点击与拖动使用实际指针坐标()
     {
@@ -81,7 +261,7 @@ public sealed class AhoCorasickViewTests
                 Dispatcher.UIThread.RunJobs();
                 Assert.True(document.IsDraft);
                 Assert.Equal("🙂a🙂", document.SearchText);
-                var build = view.GetVisualDescendants().OfType<Button>().Single(b => b.Content?.ToString() == "构建并开始实验 →");
+                var build = view.GetVisualDescendants().OfType<Button>().Single(b => b.Content?.ToString() == "应用输入 · 从根开始 →");
                 build.Command!.Execute(build.CommandParameter);
                 document.FinishCommand.Execute(null);
                 Dispatcher.UIThread.RunJobs();
@@ -158,7 +338,7 @@ public sealed class AhoCorasickViewTests
                 Assert.Same(document.CurrentStep, view.FindControl<TextTape>("Tape")!.Step);
                 Capture(window, "experiment");
                 Assert.Contains(view.GetVisualDescendants().OfType<TextBlock>(), t => t.Text == "命中「she」");
-                var buildButton = view.GetVisualDescendants().OfType<Button>().Single(b => b.Content?.ToString() == "构建并开始实验 →");
+                var buildButton = view.GetVisualDescendants().OfType<Button>().Single(b => b.Content?.ToString() == "应用输入 · 从根开始 →");
                 Assert.Same(document.BuildCommand, buildButton.Command);
                 window.Width = 760;
                 Dispatcher.UIThread.RunJobs();
