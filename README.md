@@ -4,6 +4,7 @@
 `AhoCorasickDocument` 提供章节阅读、数学说明、预测练习和真实算法驱动的交互实验。
 
 - 8 个章节：问题、Trie、fail、BFS、输出、扫描、数学与实现边界。
+- Document 内置 [16 章完整教程](docs/tutorials/aho-corasick-tutorial.md)，涵盖历史、数学推导、证明、C# 实现与习题；8 张 Mermaid 图可离线预览、缩放并查看源码。
 - 自定义词典和句子；经典、重叠、中文、连续回退、Unicode、无匹配预设。
 - Trie 生长、fail 构建、文本扫描；播放、暂停、前后单步、阶段与时间轴跳转。
 - 节点检查、后缀解释、BFS 队列、文本带、匹配结果定位。

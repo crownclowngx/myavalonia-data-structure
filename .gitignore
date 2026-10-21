@@ -2,3 +2,4 @@
 **/obj/
 TestResults/
 .aiflow/insight/
+**/node_modules/

@@ -23,6 +23,7 @@ public sealed partial class AhoCorasickDocument : ObservableObject, IPluginDocum
     private AcInspection _inspection;
     private DocumentPresentationState _presentation = new("AC 自动机 · 交互课堂");
     private AcLesson _selectedLesson = LessonCatalog.All[0];
+    private AcTutorialChapter _selectedTutorialChapter = AcTutorialCatalog.All[0];
     private string _builtKeywords;
     private int _selectedNodeId;
     private bool _projecting;
@@ -53,6 +54,7 @@ public sealed partial class AhoCorasickDocument : ObservableObject, IPluginDocum
     public DocumentPresentationState Presentation => _presentation;
     public event EventHandler? PresentationChanged;
     public IReadOnlyList<AcLesson> Lessons => LessonCatalog.All;
+    public IReadOnlyList<AcTutorialChapter> TutorialChapters => AcTutorialCatalog.All;
     public IReadOnlyList<ExampleCase> Examples => AcExampleCatalog.All;
     public IReadOnlyList<double> SpeedOptions { get; } = ImmutableArray.Create(0.5, 1, 2, 4);
     public ReadOnlyObservableCollection<AcMatchRow> VisibleMatches { get; }
@@ -67,6 +69,7 @@ public sealed partial class AhoCorasickDocument : ObservableObject, IPluginDocum
     [ObservableProperty] private string _keywordText = "he\nshe\nhis\nhers";
     [ObservableProperty] private string _searchText = "ushers";
     [ObservableProperty] private bool _isReading = true;
+    [ObservableProperty] private bool _isTutorial;
     [ObservableProperty] private bool _showFailures = true;
     [ObservableProperty] private string _errorMessage = "";
     [ObservableProperty] private string _feedback = "先做一个预测，再展开解释。";
@@ -87,6 +90,24 @@ public sealed partial class AhoCorasickDocument : ObservableObject, IPluginDocum
         }
     }
 
+    public AcTutorialChapter SelectedTutorialChapter
+    {
+        get => _selectedTutorialChapter;
+        set
+        {
+            if (_disposed || value is null || !TutorialChapters.Contains(value) || !SetProperty(ref _selectedTutorialChapter, value)) return;
+            OnPropertyChanged(nameof(TutorialProgress));
+            PreviousTutorialChapterCommand.NotifyCanExecuteChanged();
+            NextTutorialChapterCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    private int TutorialIndex => AcTutorialCatalog.All.IndexOf(SelectedTutorialChapter);
+    public string TutorialProgress => $"{TutorialIndex + 1} / {TutorialChapters.Count} 章";
+    public bool IsClassroom => !IsTutorial;
+    private bool CanPreviousTutorialChapter => !_disposed && TutorialIndex > 0;
+    private bool CanNextTutorialChapter => !_disposed && TutorialIndex + 1 < TutorialChapters.Count;
+
     public int SelectedNodeId
     {
         get => _selectedNodeId;
@@ -101,7 +122,8 @@ public sealed partial class AhoCorasickDocument : ObservableObject, IPluginDocum
     public bool HasError => ErrorMessage.Length > 0;
     public bool IsDraft => KeywordText != _builtKeywords || SearchText != Trace.Text;
     public string PlayLabel => IsPlaying ? "Ⅱ  暂停" : "▶  播放";
-    public string ModeCaption => IsReading ? "跟着问题理解，再亲手验证。" : "换一组输入，观察同一套规则如何工作。";
+    public string ModeCaption => IsTutorial ? "完整教程 · 从历史、数学到算法与实现，按章节独立阅读。"
+        : IsReading ? "跟着问题理解，再亲手验证。" : "换一组输入，观察同一套规则如何工作。";
     public string ProgressLabel => $"{FrameIndex + 1} / {Trace.Steps.Length}";
     public string StageLabel => CurrentStep.Stage switch { AcStage.Trie => "01  构建 Trie", AcStage.Failure => "02  构建 fail", _ => "03  扫描文本" };
     public string Statistics => $"{Trace.Patterns.Length} 个关键词   ·   已长出 {CurrentStep.VisibleNodes} / {Trace.Nodes.Length} 个状态   ·   {Trace.Symbols.Length} 个文本字符";
@@ -191,8 +213,13 @@ public sealed partial class AhoCorasickDocument : ObservableObject, IPluginDocum
     [RelayCommand] private void GoTrie() => Seek(Trace.StageStart(AcStage.Trie));
     [RelayCommand] private void GoFailure() => Seek(Trace.StageStart(AcStage.Failure));
     [RelayCommand] private void GoSearch() => Seek(Trace.StageStart(AcStage.Search));
-    [RelayCommand] private void ReadMode() { if (!_disposed) IsReading = true; }
-    [RelayCommand] private void ExploreMode() { if (!_disposed) IsReading = false; }
+    [RelayCommand] private void ReadMode() { if (!_disposed) { IsTutorial = false; IsReading = true; } }
+    [RelayCommand] private void ExploreMode() { if (!_disposed) { IsTutorial = false; IsReading = false; } }
+    [RelayCommand] private void TutorialMode() { if (!_disposed) IsTutorial = true; }
+    [RelayCommand(CanExecute = nameof(CanPreviousTutorialChapter))]
+    private void PreviousTutorialChapter() { if (CanPreviousTutorialChapter) SelectedTutorialChapter = TutorialChapters[TutorialIndex - 1]; }
+    [RelayCommand(CanExecute = nameof(CanNextTutorialChapter))]
+    private void NextTutorialChapter() { if (CanNextTutorialChapter) SelectedTutorialChapter = TutorialChapters[TutorialIndex + 1]; }
     [RelayCommand] private void TogglePlayback() => _playback.TogglePlayback();
     public void Pause() => _playback.Pause();
     public void Seek(int index) => _playback.Seek(index);
@@ -240,6 +267,7 @@ public sealed partial class AhoCorasickDocument : ObservableObject, IPluginDocum
     partial void OnSearchTextChanged(string value) { Pause(); OnPropertyChanged(nameof(IsDraft)); }
     partial void OnErrorMessageChanged(string value) => OnPropertyChanged(nameof(HasError));
     partial void OnIsReadingChanged(bool value) { Pause(); OnPropertyChanged(nameof(ModeCaption)); }
+    partial void OnIsTutorialChanged(bool value) { Pause(); OnPropertyChanged(nameof(IsClassroom)); OnPropertyChanged(nameof(ModeCaption)); }
 
     partial void OnSelectedMatchChanged(AcMatchRow? value)
     {

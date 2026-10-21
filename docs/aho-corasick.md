@@ -6,6 +6,9 @@
 “AC 自动机 · 交互课堂”。Standalone 复用同一份 Document 与 View，不复制算法或教学逻辑。
 
 1. **跟着学**：选一个章节，阅读例子、公式，按需展开证明，并回答预测题。
+   **完整教程**：Document 顶部提供独立阅读区，包含 16 章长文、目录与前后章导航。
+   正文维护在 [完整 Markdown 教程](tutorials/aho-corasick-tutorial.md)，随插件嵌入，离线可读；
+   8 张 Mermaid 图支持深浅主题、缩放与展开源码。进入教程暂停播放，返回课堂保留实验、草稿与进度。
 2. **演示这一节**：显式载入经典词典 `he / she / his / hers` 与 `ushers`，定位到相应关键事件。
    教材和练习始终讲述课堂例子；自定义实验不会偷偷替换教材中的例子与结论。
 3. **自己试**：每行输入一个关键词，输入待匹配文本，再点击“应用输入 · 从根开始”。
@@ -81,6 +84,11 @@ AC 的节点、fail、输出、章节和控件只属于 AC；先由第二个专�
 当前使用内存会话，不提供实验文件保存、Host 内容快照恢复、网页发布或在线分享；
 “匹配结果跳转”与任意时间轴回放已可用。播放逐个展示逻辑事件，尚未增加边运动插值动画。
 教学轨迹和渲染有额外开销，其耗时不作为纯匹配器的性能基准。
+
+完整教程是本 Document 的一个阅读模式，不增加第二个 Document 或 Tool。窄窗口使用章节下拉框；
+切换模式保留阅读位置，换章回到章首。教程使用 Markdig 解析并通过 Avalonia 原生控件展示，
+Mermaid 图从 Markdown 源码预生成后嵌入，维护方法见 [图示生成说明](../tools/tutorial-assets/README.md)。
+公式为 Unicode 文本，不宣称支持任意 LaTeX；运行时不执行 Markdown 内的 HTML 或脚本。
 
 设计参考：[Red Blob Games](https://www.redblobgames.com/pathfinding/a-star/introduction.html)、
 [VisuAlgo](https://visualgo.net/en/dfsbfs)、[Brilliant](https://brilliant.org/cs/)、

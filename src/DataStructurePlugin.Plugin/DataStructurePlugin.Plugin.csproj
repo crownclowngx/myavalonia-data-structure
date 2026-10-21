@@ -9,16 +9,41 @@
     <ManagedPluginEntryType>DataStructurePlugin.Plugin.DataStructurePluginModule</ManagedPluginEntryType>
     <ManagedPluginSdkMinInclusive>3.4.1</ManagedPluginSdkMinInclusive>
     <ManagedPluginSdkMaxExclusive>4.0.0</ManagedPluginSdkMaxExclusive>
+    <AcTutorialAssetDirectory>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(BaseIntermediateOutputPath)', 'ac-tutorial-assets'))</AcTutorialAssetDirectory>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Markdig" />
+    <ManagedPluginPrivatePackage Include="Markdig" />
     <PackageReference Include="MyAvaloniaManagement.Plugin.Build" PrivateAssets="all" />
     <PackageReference Include="MyAvaloniaManagement.PluginSdk" />
     <PackageReference Include="MyAvaloniaManagement.Icons" />
     <ManagedPluginPrivatePackage Include="MyAvaloniaManagement.Icons" />
     <PackageReference Include="MyAvaloniaManagement.PluginSdk.UI" />
   </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="../../docs/tutorials/aho-corasick-tutorial.md"
+                      LogicalName="DataStructurePlugin.AhoCorasick.Tutorial.md" />
+  </ItemGroup>
+
+  <!-- 图片只作为构建产物写入 obj，Git 仅保存 Markdown、生成器与依赖锁文件。 -->
+  <Target Name="GenerateAcTutorialDiagrams"
+          Inputs="../../docs/tutorials/aho-corasick-tutorial.md;../../tools/tutorial-assets/render.mjs;../../tools/tutorial-assets/package.json;../../tools/tutorial-assets/package-lock.json"
+          Outputs="$(AcTutorialAssetDirectory)/manifest.json">
+    <Exec Command="node &quot;$(MSBuildProjectDirectory)/../../tools/tutorial-assets/render.mjs&quot; --ensure --output &quot;$(AcTutorialAssetDirectory)&quot;" />
+  </Target>
+
+  <Target Name="CollectAcTutorialDiagrams" BeforeTargets="AssignTargetPaths"
+          DependsOnTargets="GenerateAcTutorialDiagrams" Condition="'$(DesignTimeBuild)' != 'true'">
+    <ItemGroup>
+      <_AcTutorialDiagramFile Include="$(AcTutorialAssetDirectory)/*.png" />
+      <EmbeddedResource Include="@(_AcTutorialDiagramFile)"
+                        LogicalName="DataStructurePlugin.AhoCorasick.Diagrams.%(_AcTutorialDiagramFile.Filename)%(_AcTutorialDiagramFile.Extension)" />
+      <FileWrites Include="$(AcTutorialAssetDirectory)/*" />
+    </ItemGroup>
+  </Target>
 
 </Project>

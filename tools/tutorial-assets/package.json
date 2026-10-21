@@ -1,0 +1,14 @@
+{
+  "name": "ac-tutorial-assets",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node render.mjs",
+    "check": "node render.mjs --check"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "mermaid": "11.17.2",
+    "playwright": "1.63.0"
+  }
+}

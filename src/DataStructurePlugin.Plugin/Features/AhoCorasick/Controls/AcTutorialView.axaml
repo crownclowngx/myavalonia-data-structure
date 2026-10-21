@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:DataStructurePlugin.Features.AhoCorasick"
+             xmlns:content="using:DataStructurePlugin.Features.AhoCorasick.Content"
+             xmlns:controls="using:DataStructurePlugin.Features.AhoCorasick.Controls"
+             x:Class="DataStructurePlugin.Features.AhoCorasick.Controls.AcTutorialView"
+             x:DataType="local:AhoCorasickDocument">
+  <UserControl.Styles>
+    <Style Selector="SelectableTextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource Ac.Text}" />
+      <Setter Property="SelectionBrush" Value="{DynamicResource Ac.Selection}" />
+    </Style>
+    <Style Selector="Border.md-code">
+      <Setter Property="Background" Value="{DynamicResource Ac.Formula}" />
+      <Setter Property="Padding" Value="16,12" /><Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="Border.md-quote">
+      <Setter Property="Background" Value="{DynamicResource Ac.Note}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Ac.Accent}" />
+      <Setter Property="BorderThickness" Value="3,0,0,0" /><Setter Property="Padding" Value="16,12" />
+    </Style>
+    <Style Selector="Border.md-cell">
+      <Setter Property="BorderBrush" Value="{DynamicResource Ac.Border}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" /><Setter Property="Padding" Value="10" />
+    </Style>
+    <Style Selector="Border.md-header"><Setter Property="Background" Value="{DynamicResource Ac.Note}" /></Style>
+    <Style Selector="Border.md-rule"><Setter Property="Background" Value="{DynamicResource Ac.Border}" /></Style>
+    <Style Selector="HyperlinkButton.md-link">
+      <Setter Property="Background" Value="Transparent" /><Setter Property="Foreground" Value="{DynamicResource Ac.Accent}" />
+    </Style>
+  </UserControl.Styles>
+  <Grid x:Name="TutorialGrid" ColumnDefinitions="242,*" Margin="18,0,18,18" ColumnSpacing="18">
+    <ScrollViewer x:Name="TutorialRail" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Spacing="12">
+        <TextBlock Text="完整教程 / 学习目录" Classes="muted" Margin="9,8" />
+        <ListBox ItemsSource="{Binding TutorialChapters}" SelectedItem="{Binding SelectedTutorialChapter}" AutomationProperties.Name="完整教程目录">
+          <ListBox.ItemTemplate><DataTemplate x:DataType="content:AcTutorialChapter">
+            <TextBlock Text="{Binding Title}" FontSize="13" TextWrapping="Wrap" LineHeight="21" />
+          </DataTemplate></ListBox.ItemTemplate>
+        </ListBox>
+        <TextBlock Text="正文可选择复制。切回课堂可继续上一次实验。" Classes="muted" TextWrapping="Wrap" Margin="9,0" LineHeight="21" />
+      </StackPanel>
+    </ScrollViewer>
+    <Border Grid.Column="1" Background="{DynamicResource Ac.Surface}" BorderBrush="{DynamicResource Ac.Border}" BorderThickness="1" CornerRadius="12" ClipToBounds="True">
+      <Grid RowDefinitions="Auto,*,Auto">
+        <StackPanel Spacing="8" Margin="22,16,22,10">
+          <TextBlock Text="AC 自动机：从多模式匹配到数学原理与工程实现" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+          <ComboBox x:Name="TutorialCompactChapters" IsVisible="False" ItemsSource="{Binding TutorialChapters}" SelectedItem="{Binding SelectedTutorialChapter}"
+                    HorizontalAlignment="Stretch" AutomationProperties.Name="选择完整教程章节">
+            <ComboBox.ItemTemplate><DataTemplate x:DataType="content:AcTutorialChapter"><TextBlock Text="{Binding Title}" TextWrapping="Wrap" /></DataTemplate></ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+        <ScrollViewer Grid.Row="1" x:Name="TutorialScroll" HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="完整教程正文">
+          <controls:AcMarkdownView x:Name="TutorialMarkdown" Markdown="{Binding SelectedTutorialChapter.Markdown}"
+                                   MaxWidth="900" HorizontalAlignment="Stretch" Margin="26,0,26,24" />
+        </ScrollViewer>
+        <Border Grid.Row="2" BorderBrush="{DynamicResource Ac.Border}" BorderThickness="0,1,0,0" Padding="16,10">
+          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <Button Content="← 上一章" Command="{Binding PreviousTutorialChapterCommand}" />
+            <TextBlock Grid.Column="1" Text="{Binding TutorialProgress}" Classes="muted" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Button Grid.Column="2" Content="下一章 →" Command="{Binding NextTutorialChapterCommand}" />
+          </Grid>
+        </Border>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>
