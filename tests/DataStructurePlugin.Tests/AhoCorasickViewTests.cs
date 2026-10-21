@@ -27,6 +27,7 @@ public sealed class ClassroomTestApplication : Application
         .UseSkia().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false, ShouldRenderOnUIThread = true });
 }
 
+[Collection(AcUiCollection.Name)]
 public sealed class AhoCorasickViewTests
 {
     [Theory]

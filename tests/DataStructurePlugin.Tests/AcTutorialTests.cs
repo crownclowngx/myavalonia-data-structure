@@ -14,6 +14,13 @@ using Xunit;
 
 namespace DataStructurePlugin.Tests;
 
+[CollectionDefinition(Name, DisableParallelization = true)]
+public sealed class AcUiCollection
+{
+    public const string Name = "AC classroom UI";
+}
+
+[Collection(AcUiCollection.Name)]
 public sealed class AcTutorialTests
 {
     [Fact]

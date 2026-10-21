@@ -6,3 +6,4 @@
 | --- | --- | --- |
 | G0001 | AC 自动机独立域首版与 SOLID 再审核 | [专项说明](G0001/README.md) |
 | G0002 | 深浅主题继承、逐步比较与本地部署 | [专项说明](G0002/README.md) |
+| G0003 | 完整 Markdown 教程、Mermaid 图与 Document 内预览 | [专项说明](G0003/README.md) |

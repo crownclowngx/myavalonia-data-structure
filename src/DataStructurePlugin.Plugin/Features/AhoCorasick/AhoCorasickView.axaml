@@ -33,7 +33,7 @@
 
   <Grid RowDefinitions="Auto,*,Auto">
     <Border Padding="24,20,24,16" BorderBrush="{DynamicResource Ac.Border}" BorderThickness="0,0,0,1">
-      <Grid RowDefinitions="Auto,Auto">
+      <Grid x:Name="HeaderGrid" ColumnDefinitions="*,Auto" RowDefinitions="Auto">
         <StackPanel Spacing="5">
           <TextBlock Text="数据结构  /  交互笔记  /  字符串算法" Classes="muted" LetterSpacing="1" />
           <StackPanel Orientation="Horizontal" Spacing="12">
@@ -44,7 +44,7 @@
           </StackPanel>
           <TextBlock Text="{Binding ModeCaption}" Classes="muted" />
         </StackPanel>
-        <WrapPanel Grid.Row="1" Margin="0,12,0,0">
+        <WrapPanel x:Name="ModeToolbar" Grid.Column="1" VerticalAlignment="Center">
           <Button Content="完整教程" Command="{Binding TutorialModeCommand}" Margin="0,0,6,4" AutomationProperties.Name="打开完整教程" />
           <Button Content="跟着学" Command="{Binding ReadModeCommand}" AutomationProperties.Name="切换到章节学习" />
           <Button Content="自己试 ↗" Classes="primary" Command="{Binding ExploreModeCommand}" Margin="6,0,0,4" AutomationProperties.Name="切换到自由实验" />

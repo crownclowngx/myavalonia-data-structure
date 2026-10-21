@@ -11,6 +11,7 @@ public partial class AhoCorasickView : UserControl
     private AhoCorasickDocument? _boundDocument;
     private bool? _narrow;
     private bool? _stacked;
+    private bool? _headerStacked;
     public AhoCorasickView()
     {
         InitializeComponent();
@@ -20,6 +21,16 @@ public partial class AhoCorasickView : UserControl
 
     private void AdaptLayout()
     {
+        var headerStacked = Bounds.Width < 950;
+        if (_headerStacked != headerStacked)
+        {
+            _headerStacked = headerStacked;
+            HeaderGrid.ColumnDefinitions = new ColumnDefinitions(headerStacked ? "*" : "*,Auto");
+            HeaderGrid.RowDefinitions = new RowDefinitions(headerStacked ? "Auto,Auto" : "Auto");
+            Grid.SetColumn(ModeToolbar, headerStacked ? 0 : 1);
+            Grid.SetRow(ModeToolbar, headerStacked ? 1 : 0);
+            ModeToolbar.Margin = headerStacked ? new Thickness(0, 12, 0, 0) : default;
+        }
         var narrow = Bounds.Width < 1_100;
         if (_narrow != narrow)
         {
