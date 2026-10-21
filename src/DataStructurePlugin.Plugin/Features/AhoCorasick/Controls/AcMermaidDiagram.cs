@@ -48,7 +48,8 @@ public sealed class AcMermaidDiagram : Border
         panel.Children.Add(_viewport);
         panel.Children.Add(new Expander
         {
-            Header = "查看 Mermaid 源码", HorizontalAlignment = HorizontalAlignment.Stretch,
+            Header = "查看 Mermaid 源码",
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             Content = new SelectableTextBlock { Text = source, TextWrapping = TextWrapping.Wrap, FontFamily = new FontFamily("Cascadia Code, Consolas, Microsoft YaHei UI"), FontSize = 12, Margin = new Thickness(0, 10, 0, 0) }
         });
         Child = panel;
